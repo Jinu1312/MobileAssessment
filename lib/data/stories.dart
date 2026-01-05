@@ -11,8 +11,10 @@ final List<Story> stories = [
       "What's strange is this user has uploaded hundreds of photos before without issues. Steve checked their account - no problems, good standing, plenty of storage space available.",
       "You assign it to QA. By Tuesday afternoon, your QA engineer Sundar comes back with interesting findings. He says, 'I can reproduce it, but only with specific photos.' He tested with twenty different images. Photos taken fresh from the camera - failed almost every single time at 95%. But here's the weird part - screenshots uploaded perfectly. Photos from his gallery that were taken last month? No problem at all. Even videos uploaded without any issue.",
       "Sundar checked everything - WiFi was stable, cellular data was strong, the user's internet connection wasn't dropping. He even tested on different devices. Same pattern.",
-      "You reach out to the backend team. They check their logs. 'Nothing changed on our end,' the backend lead confirms. 'We're receiving the uploads, processing them normally. No recent deployments, no infrastructure changes.'",
-      "You look at the data Sundar collected. Fresh camera photos: 8MB, 10MB, 12MB. Gallery photos from last month: 2MB, 3MB, 4MB. Screenshots: 500KB, 800KB. There's a pattern here with the file sizes, but why would recent photos be so much larger than older ones?"
+      "He shows you the detailed logs. 'Look at this - fresh camera photos are taking 28-32 seconds to upload and failing right before completion. The app logs show memory warnings appearing around the same time. But gallery photos? They upload in 8-10 seconds with no memory issues.'",
+      "You reach out to the backend team. They check their logs. 'Nothing changed on our end,' the backend lead confirms. 'We're receiving the uploads, processing them normally. No recent deployments, no infrastructure changes. Your timeout is set to 30 seconds on the client side, right?'",
+      "You check - yes, 30-second timeout.",
+      "You look at the data Sundar collected. Fresh camera photos: 8MB, 10MB, 12MB taking 28-35 seconds to upload. Gallery photos from last month: 2MB, 3MB, 4MB taking 6-10 seconds. Screenshots: 500KB, 800KB taking 2-3 seconds."
     ],
     questions: [
       Question(
@@ -20,7 +22,7 @@ final List<Story> stories = [
         text: "Based on the scenario, what is the most likely reason the upload fails?",
         type: QuestionType.singleChoice,
         options: [
-          "The selected images have significantly larger dimensions and data size, leading to higher memory usage and longer processing during upload.",
+          "The selected images have significantly larger dimensions and data size, leading to higher memory usage or upload timeout before completion.",
           "The application lacks sufficient permission to access certain image files at runtime",
           "The image encoding format used by the device is incompatible with the upload pipeline",
           "The backend enforces a strict maximum file size and rejects requests that exceed it",

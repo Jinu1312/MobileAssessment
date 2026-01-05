@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobile_assessment/ui/splash_screen.dart';
 import 'package:mobile_assessment/ui/story_listening_screen.dart';
 
 void main() {
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const StoryListeningScreenWrapper(),
+      home: const SplashScreen(),
     );
   }
 }
