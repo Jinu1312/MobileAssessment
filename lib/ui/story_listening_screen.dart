@@ -4,7 +4,7 @@ import '../models/story_result.dart';
 import '../services/tts_service.dart';
 import '../widgets/animated_waveform.dart';
 import '../widgets/play_button.dart';
-import '../data/stories.dart'; // <-- your provided stories list
+import '../data/stories.dart';
 import 'question_screen.dart';
 
 class StoryListeningScreen extends StatefulWidget {
@@ -31,9 +31,7 @@ class _StoryListeningScreenState extends State<StoryListeningScreen> {
   @override
   void initState() {
     super.initState();
-
     story = stories[widget.storyIndex];
-
     _tts = TtsService();
     _tts.init(onComplete: _onSegmentCompleted);
   }
@@ -63,7 +61,10 @@ class _StoryListeningScreenState extends State<StoryListeningScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => QuestionScreen(story: story,results: widget.results,),
+        builder: (_) => QuestionScreen(
+          story: story,
+          results: widget.results,
+        ),
       ),
     );
   }
@@ -77,6 +78,7 @@ class _StoryListeningScreenState extends State<StoryListeningScreen> {
   @override
   Widget build(BuildContext context) {
     final isLastSegment = currentIndex == story.segments.length - 1;
+    final int partCount = story.segments.length;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0E1621),
@@ -99,70 +101,134 @@ class _StoryListeningScreenState extends State<StoryListeningScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
-              const Spacer(),
-
-              Center(
-                child: AnimatedWaveform(isPlaying: isPlaying),
-              ),
-
-              const SizedBox(height: 32),
-
-              Slider(
-                value: currentIndex.toDouble(),
-                min: 0,
-                max: (story.segments.length - 1).toDouble(),
-                divisions: story.segments.length - 1,
-                activeColor: Colors.blueAccent,
-                inactiveColor: Colors.white24,
-                label: "Part ${currentIndex + 1}",
-                onChanged: (value) {
-                  if (!isPlaying) {
-                    setState(() {
-                      currentIndex = value.toInt();
-                    });
-                  }
-                },
-              ),
-
               const SizedBox(height: 24),
 
-              // Play button stays as is
-              Center(
-                child: PlayButton(
-                  isPlaying: isPlaying,
-                  onTap: _togglePlay,
-                ),
-              ),
+              /// MAIN CONTENT
+              Expanded(
+                child: Column(
+                  children: [
+                    /// TOP AREA (slider + buttons)
+                    Expanded(
+                      child: Row(
+                        children: [
+                          /// LEFT – PARTS + SLIDER (shared layout math)
+                          SizedBox(
+                            width: 100,
+                            child: Row(
+                              children: [
+                                /// PART LABELS (aligned by Expanded rows)
+                                Column(
+                                  children: List.generate(partCount, (i) {
+                                    final index = partCount - 1 - i;
+                                    final isActive = currentIndex == index;
 
-              const SizedBox(height: 16),
+                                    return Expanded(
+                                      child: Row(
+                                        children: [
+                                          /// PART LABEL
+                                          AnimatedDefaultTextStyle(
+                                            duration: const Duration(milliseconds: 300),
+                                            style: TextStyle(
+                                              fontSize: isActive ? 13 : 12,
+                                              fontWeight:
+                                              isActive ? FontWeight.w600 : FontWeight.normal,
+                                              color: isActive
+                                                  ? Colors.blueAccent
+                                                  : Colors.white70,
+                                            ),
+                                            child: Text("Part ${index + 1}"),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }),
+                                ),
 
-              // Only show "Answer Questions" button if last segment is reached
-              if (isLastSegment)
-                Center(
-                  child: ElevatedButton(
-                    onPressed: _goToQuestions,
-                    child: const Text("Go to Questions"),
-                  ),
-                ),
 
-              const Spacer(),
+                                const SizedBox(width: 6),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(
-                  story.segments.length,
-                      (i) => AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: i == currentIndex
-                          ? Colors.blueAccent
-                          : Colors.white24,
+                                /// VERTICAL SLIDER (same Expanded height)
+                                Expanded(
+                                  child: RotatedBox(
+                                    quarterTurns: 3,
+                                    child: SliderTheme(
+                                      data: SliderTheme.of(context).copyWith(
+                                        trackHeight: 4,
+                                        overlayShape:
+                                        SliderComponentShape.noOverlay,
+                                        thumbShape:
+                                        const RoundSliderThumbShape(
+                                          enabledThumbRadius: 8,
+                                        ),
+                                      ),
+                                      child: Slider(
+                                        value: currentIndex.toDouble(),
+                                        min: 0,
+                                        max: (partCount - 1).toDouble(),
+                                        divisions:
+                                        partCount > 1 ? partCount - 1 : 1,
+                                        activeColor: Colors.blueAccent,
+                                        inactiveColor: Colors.white24,
+                                        onChanged: (value) {
+                                          if (!isPlaying) {
+                                            setState(() {
+                                              currentIndex = value.toInt();
+                                            });
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(width: 24),
+
+                          /// RIGHT – CENTER BUTTONS
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                AnimatedScale(
+                                  scale: isPlaying ? 1.0 : 1.08,
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeOut,
+                                  child: PlayButton(
+                                    isPlaying: isPlaying,
+                                    onTap: _togglePlay,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 16),
+                                if (isLastSegment)
+                                  ElevatedButton(
+                                    onPressed: _goToQuestions,
+                                    child: const Text("Go to Questions"),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+
+                    /// BOTTOM – WAVEFORM + DOTS
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.03),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          AnimatedWaveform(isPlaying: isPlaying),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
