@@ -91,6 +91,30 @@ class _QuestionScreenState extends State<QuestionScreen> {
       );
     }
   }
+  ButtonStyle primaryButton = ElevatedButton.styleFrom(
+    backgroundColor: Colors.blueAccent,
+    foregroundColor: Colors.white,
+    elevation: 3,
+    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(14),
+    ),
+    textStyle: const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+    ),
+  );
+
+  ButtonStyle secondaryButton = ElevatedButton.styleFrom(
+    backgroundColor: Colors.transparent,
+    foregroundColor: Colors.white70,
+    elevation: 0,
+    side: const BorderSide(color: Colors.white24),
+    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(14),
+    ),
+  );
 
 
   @override
@@ -116,13 +140,23 @@ class _QuestionScreenState extends State<QuestionScreen> {
               const SizedBox(height: 24),
 
               // Question text
-              Text(
-                question.text,
-                style: const TextStyle(
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  question.text,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
-                    fontWeight: FontWeight.bold),
+                    fontWeight: FontWeight.w600,
+                    height: 1.4,
+                  ),
+                ),
               ),
+
               const SizedBox(height: 24),
 
               // Options
@@ -150,13 +184,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         child: Container(
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? Colors.blueAccent.withOpacity(0.3)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
+                                ? Colors.blueAccent.withOpacity(0.18)
+                                : Colors.white.withOpacity(0.03),
+                            borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isSelected
                                   ? Colors.blueAccent
                                   : Colors.white24,
+                              width: isSelected ? 1.5 : 1,
                             ),
                           ),
                           padding: const EdgeInsets.symmetric(
@@ -215,42 +250,48 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
               // Navigation buttons
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Previous button
-                  if (currentQuestionIndex > 0)
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white24,
-                        foregroundColor: Colors.white,
+                  /// PREVIOUS
+                  Expanded(
+                    child: ElevatedButton(
+                      style: secondaryButton.copyWith(
+                        padding: MaterialStateProperty.all(
+                          const EdgeInsets.symmetric(vertical: 14),
+                        ),
                       ),
-                      onPressed: () {
-                        setState(() => currentQuestionIndex--);
-                      },
+                      onPressed: currentQuestionIndex > 0
+                          ? () => setState(() => currentQuestionIndex--)
+                          : null,
                       child: const Text("Previous"),
-                    )
-                  else
-                    const SizedBox(width: 100), // Placeholder
-
-                  // Next / Finish button
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
                     ),
-                    onPressed: selected.isNotEmpty ? () {
-                      if (currentQuestionIndex <
-                          widget.story.questions.length - 1) {
-                        setState(() => currentQuestionIndex++);
-                      } else {
-                        // Last question → Save score & go to next story
-                        goToNext();
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  /// NEXT / FINISH
+                  Expanded(
+                    child: ElevatedButton(
+                      style: primaryButton.copyWith(
+                        padding: MaterialStateProperty.all(
+                          const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                      onPressed: selected.isNotEmpty
+                          ? () {
+                        if (currentQuestionIndex <
+                            widget.story.questions.length - 1) {
+                          setState(() => currentQuestionIndex++);
+                        } else {
+                          goToNext();
+                        }
                       }
-                    } : null,
-                    child: Text(
-                      currentQuestionIndex ==
-                          widget.story.questions.length - 1
-                          ? "Finish & Next Story"
-                          : "Next",
+                          : null,
+                      child: Text(
+                        currentQuestionIndex ==
+                            widget.story.questions.length - 1
+                            ? "Finish & Next"
+                            : "Next",
+                      ),
                     ),
                   ),
                 ],

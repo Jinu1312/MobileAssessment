@@ -216,17 +216,13 @@ class _StoryListeningScreenState extends State<StoryListeningScreen> {
 
                     /// BOTTOM – WAVEFORM + DOTS
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 10),
+                      margin: const EdgeInsets.only(top: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.03),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Column(
-                        children: [
-                          AnimatedWaveform(isPlaying: isPlaying),
-                          const SizedBox(height: 16),
-                        ],
-                      ),
+                      child: AnimatedWaveform(isPlaying: isPlaying),
                     ),
                   ],
                 ),
